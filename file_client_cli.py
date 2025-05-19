@@ -13,9 +13,9 @@ def send_command(command_str=""):
     sock.connect(server_address)
     logging.warning(f"connecting to {server_address}")
     try:
-        logging.warning(f"sending message ")
+        logging.warning(f"sending message")
         sock.sendall((command_str + "\r\n\r\n").encode())
-        data_received = "" 
+        data_received = ""
         while True:
             data = sock.recv(16)
             if data:
@@ -24,7 +24,7 @@ def send_command(command_str=""):
                     break
             else:
                 break
-        json_response = data_received.split("\r\n\r\n")[0]
+        json_response = data_received.strip("\r\n\r\n")[0]
         hasil = json.loads(json_response)
         logging.warning("data received from server:")
         return hasil
@@ -90,8 +90,6 @@ def remote_delete(filename=""):
 
 
 if __name__ == "__main__":
-    server_address = ("172.16.16.101", 6667)
-    # remote_list()
-    #remote_get("donalbebek.jpg")
-    remote_upload("GCyuDhMaEAAlAby.jpg")
-    #remote_delete("contoh.txt")
+    server_address = ("172.16.16.101", 6666)
+    remote_list()
+    remote_get("donalbebek.jpg")

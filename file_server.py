@@ -6,7 +6,8 @@ import time
 import sys
 
 
-from file_protocol import  FileProtocol
+from file_protocol import FileProtocol
+
 fp = FileProtocol()
 
 
@@ -17,21 +18,25 @@ class ProcessTheClient(threading.Thread):
         threading.Thread.__init__(self)
 
     def run(self):
+        buffer = ""
         while True:
             data = self.connection.recv(32)
-            if data:
-                d = data.decode()
-                hasil = fp.proses_string(d)
-                hasil=hasil+"\r\n\r\n"
-                self.connection.sendall(hasil.encode())
-            else:
+            if not data:
                 break
+            buffer += data.decode()
+            while "\r\n\r\n" in buffer:
+                command_str, buffer = buffer.split("\r\n\r\n", 1)
+                logging.warning(f"command_str: {command_str}")
+                hasil = fp.proses_string(command_str)
+                response = hasil + "\r\n\r\n"
+                logging.warning(f"response: {response}")
+                self.connection.sendall(response.encode())
         self.connection.close()
 
 
 class Server(threading.Thread):
-    def __init__(self,ipaddress='0.0.0.0',port=8889):
-        self.ipinfo=(ipaddress,port)
+    def __init__(self, ipaddress="0.0.0.0", port=8889):
+        self.ipinfo = (ipaddress, port)
         self.the_clients = []
         self.my_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         self.my_socket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
@@ -51,10 +56,9 @@ class Server(threading.Thread):
 
 
 def main():
-    svr = Server(ipaddress='0.0.0.0',port=6666)
+    svr = Server(ipaddress="0.0.0.0", port=6667)
     svr.start()
 
 
 if __name__ == "__main__":
     main()
-
